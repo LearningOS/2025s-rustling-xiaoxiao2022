@@ -3,7 +3,15 @@
 // Execute `rustlings hint threads3` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
+
+
+// hint: An alternate way to handle concurrency between threads is to use
+// a mpsc (multiple producer, single consumer) channel to communicate.
+// With both a sending end and a receiving end, it's possible to
+// send values in one thread and receive them in another.
+// Multiple producers are possible by using clone() to create a duplicate
+// of the original sending end.
+// See https://doc.rust-lang.org/book/ch16-02-message-passing.html for more info.
 
 use std::sync::mpsc;
 use std::sync::Arc;
@@ -31,18 +39,20 @@ fn send_tx(q: Queue, tx: mpsc::Sender<u32>) -> () {
     let qc1 = Arc::clone(&qc);
     let qc2 = Arc::clone(&qc);
 
+    let tx1 = tx.clone();
     thread::spawn(move || {
         for val in &qc1.first_half {
             println!("sending {:?}", val);
-            tx.send(*val).unwrap();
+            tx1.send(*val).unwrap();
             thread::sleep(Duration::from_secs(1));
         }
     });
 
+    let tx2 = tx.clone();
     thread::spawn(move || {
         for val in &qc2.second_half {
             println!("sending {:?}", val);
-            tx.send(*val).unwrap();
+            tx2.send(*val).unwrap();
             thread::sleep(Duration::from_secs(1));
         }
     });

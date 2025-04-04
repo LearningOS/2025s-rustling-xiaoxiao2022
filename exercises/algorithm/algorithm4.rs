@@ -3,7 +3,6 @@
 	This problem requires you to implement a basic interface for a binary tree
 */
 
-//I AM NOT DONE
 use std::cmp::Ordering;
 use std::fmt::Debug;
 
@@ -51,12 +50,21 @@ where
     // Insert a value into the BST
     fn insert(&mut self, value: T) {
         //TODO
+        if let Some(ref mut root) = self.root {
+            root.insert(value);
+        } else {
+            self.root = Some(Box::new(TreeNode::new(value)));
+        }
     }
 
     // Search for a value in the BST
     fn search(&self, value: T) -> bool {
         //TODO
-        true
+        if let Some(ref root) = self.root {  // ref 关键字用于‌模式匹配时创建引用‌，而不是移动或拷贝值
+            root.search(value)
+        } else {
+            false
+        }
     }
 }
 
@@ -67,6 +75,47 @@ where
     // Insert a node into the tree
     fn insert(&mut self, value: T) {
         //TODO
+        match value.cmp(&self.value) {
+            Ordering::Less => {
+                if let Some(ref mut left) = self.left {
+                    left.insert(value);
+                } else {
+                    self.left = Some(Box::new(TreeNode::new(value)));
+                }
+            }
+            Ordering::Greater => {
+                if let Some(ref mut right) = self.right {
+                    right.insert(value);
+                } else {
+                    self.right = Some(Box::new(TreeNode::new(value)));
+                }
+            }
+            Ordering::Equal => {
+                // Do nothing for duplicates
+            }
+        }
+    }
+
+    fn search(&self, value: T) -> bool {
+        // ref	模式匹配（match / if let）	‌绑定引用‌，避免移动所有权
+        // &	表达式（如方法调用）	‌显式取引用‌，传递借用
+        match value.cmp(&self.value) {
+            Ordering::Less => {
+                if let Some(ref left) = self.left {
+                    left.search(value)
+                } else {
+                    false
+                }
+            }
+            Ordering::Greater => {
+                if let Some(ref right) = self.right {
+                    right.search(value)
+                } else {
+                    false
+                }
+            }
+            Ordering::Equal => true,
+        }
     }
 }
 

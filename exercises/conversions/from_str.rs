@@ -31,8 +31,6 @@ enum ParsePersonError {
     ParseInt(ParseIntError),
 }
 
-// I AM NOT DONE
-
 // Steps:
 // 1. If the length of the provided string is 0, an error should be returned
 // 2. Split the given string on the commas present in it
@@ -52,6 +50,32 @@ enum ParsePersonError {
 impl FromStr for Person {
     type Err = ParsePersonError;
     fn from_str(s: &str) -> Result<Person, Self::Err> {
+        if s.is_empty() {
+            return Err(ParsePersonError::Empty);
+        }
+
+        let parts: Vec<&str> = s.split(',').collect();
+        if parts.len() != 2 {
+            return Err(ParsePersonError::BadLen);
+        }
+
+        let name = parts[0].trim();
+        if name.is_empty() {
+            return Err(ParsePersonError::NoName);
+        }
+
+    //   map_err 是 Result 和 Option 类型的一个方法，用于对错误值进行转换或处理。以下是其核心特性和用法：
+    // ‌1. 基本功能‌
+    // ‌作用对象‌：Result<T, E> 或 Option<T>（通过 ok_or 转换为 Result 后）‌。
+    // ‌核心行为‌：当值为 Err(e) 或 None 时，通过闭包将原始错误 e 转换为新错误类型 F，保持 Ok 或 Some 不变‌。
+    // If parsing fails, return Err(ParsePersonError::ParseInt) with the wrapped ParseIntError
+    // 当 parse::<usize>() 失败时，会产生一个 ParseIntError
+    // map_err(ParsePersonError::ParseInt) 将这个错误包装到 ParsePersonError::ParseInt 变体中
+    // ? 操作符会：
+    // 如果解析成功，继续执行并获取 usize 值
+    // 如果失败，立即返回 ParsePersonError::ParseInt 错误
+        let age = parts[1].trim().parse::<usize>().map_err(ParsePersonError::ParseInt)?;
+        Ok(Person {name: name.to_string(), age})
     }
 }
 
